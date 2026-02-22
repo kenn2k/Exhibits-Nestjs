@@ -4,8 +4,8 @@ import { User } from './entities/user.entity';
 import { SALT_ROUNDS } from './constants';
 import { RegisterDto } from './dtos/register.dto';
 import * as bcrypt from 'bcrypt';
-import { RegisterUser } from './types';
 import { InjectRepository } from '@nestjs/typeorm';
+import { IUser } from 'src/auth/types';
 
 @Injectable()
 export class UserService {
@@ -14,7 +14,7 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
-  async registerUser(data: RegisterDto): Promise<RegisterUser> {
+  async registerUser(data: RegisterDto): Promise<IUser> {
     const { username, password } = data;
 
     const isExistingUser = await this.userRepository.findOne({
@@ -33,8 +33,10 @@ export class UserService {
     });
 
     const savedUser = await this.userRepository.save(user);
-    const { password: _, ...result } = savedUser;
 
-    return result as RegisterUser;
+    return {
+      id: savedUser.id,
+      username: savedUser.username,
+    };
   }
 }
