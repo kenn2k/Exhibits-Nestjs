@@ -126,7 +126,6 @@ export class ExhibitController {
     status: 200,
     description: 'Own exhibits successfully received.',
   })
-  @ApiQuery({ type: QueryExhibitDto })
   getAllOwn(@Query() query: QueryExhibitDto, @Req() req: RequestWithExhibit) {
     const { page = 1, limit = 10 } = query;
     return this.exhibitService.getOwnExhibits(req.user.id, page, limit);
