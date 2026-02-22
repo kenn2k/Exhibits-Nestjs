@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Exhibit } from './entities/exhibit.entity';
-import { FindManyOptions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateExhibitDto } from './dtos/createExhibit.dto';
 import { User } from 'src/user/entities/user.entity';
 import 'multer';
@@ -60,16 +60,18 @@ export class ExhibitService {
     page: number,
     limit: number,
   ): Promise<PaginatedExhibits<Exhibit>> {
-    return this.exhibitsPaginate({ order: { id: 'DESC' } }, page, limit);
+    return this.exhibitsPaginate(page, limit);
   }
 
   /* Get one exhibit by id */
   async getExhibitById(id: number): Promise<Exhibit> {
-    const exhibit = await this.exhibitRepository.findOne({
-      where: {
-        id,
-      },
-    });
+    const exhibit = await this.exhibitRepository
+      .createQueryBuilder('exhibit')
+      .loadRelationCountAndMap('exhibit.commentCount', 'exhibit.comments')
+      .leftJoinAndSelect('exhibit.user', 'user')
+      .where('exhibit.id = :id', { id })
+      .getOne();
+
     if (!exhibit) {
       throw new NotFoundException(`Exhibit with id ${id} not found`);
     }
@@ -81,14 +83,7 @@ export class ExhibitService {
     page: number,
     limit: number,
   ): Promise<PaginatedExhibits<Exhibit>> {
-    return this.exhibitsPaginate(
-      {
-        where: { user: { id: userId } },
-        order: { id: 'DESC' },
-      },
-      page,
-      limit,
-    );
+    return this.exhibitsPaginate(page, limit, userId);
   }
 
   /* Delete an exhibit by id if the requesting user is the owner */
@@ -131,18 +126,29 @@ export class ExhibitService {
 
   /* Private method for paginating exhibits */
   private async exhibitsPaginate(
-    options: FindManyOptions<Exhibit>,
     page: number,
     limit: number,
+    userId?: number,
   ): Promise<PaginatedExhibits<Exhibit>> {
-    const [result, total] = await this.exhibitRepository.findAndCount({
-      ...options,
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+    const queryBuilder = this.exhibitRepository.createQueryBuilder('exhibit');
+
+    queryBuilder
+      .loadRelationCountAndMap('exhibit.commentCount', 'exhibit.comments')
+      .leftJoinAndSelect('exhibit.user', 'user');
+
+    if (userId) {
+      queryBuilder.where('exhibit.user.id = :userId', { userId });
+    }
+
+    const total = await queryBuilder.getCount();
+    const results = await queryBuilder
+
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
 
     return {
-      data: result,
+      data: results,
       total,
       page,
       limit,

@@ -22,7 +22,7 @@ export class AuthController {
   /* Login user */
   @UseGuards(AuthGuard('local'))
   @Post('login')
-  @ApiOperation({ summary: 'Login user and receiving JWT token' })
+  @ApiOperation({ summary: 'Login user and receiving JWT token.' })
   @ApiBody({ type: LoginDto })
   @ApiResponse({
     status: 200,

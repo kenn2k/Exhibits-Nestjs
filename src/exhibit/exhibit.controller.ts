@@ -28,6 +28,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { QueryExhibitDto } from './dtos/queryExhibit.dto';
+import { NotificationsGateway } from 'src/notifications/notifications.gateway';
 
 interface RequestWithExhibit extends ExpressRequest {
   user: IUser;
@@ -35,7 +36,10 @@ interface RequestWithExhibit extends ExpressRequest {
 
 @Controller('exhibits')
 export class ExhibitController {
-  constructor(private readonly exhibitService: ExhibitService) {}
+  constructor(
+    private readonly exhibitService: ExhibitService,
+    private readonly notificationService: NotificationsGateway,
+  ) {}
 
   /* Create a new exhibit with image upload */
   @UseGuards(JwtAuthGuard)
@@ -79,11 +83,16 @@ export class ExhibitController {
     }
 
     const exhibit = this.exhibitService.createExhibit(file, data, req.user.id);
+
+    this.notificationService.handleNewPost({
+      message: data.description,
+      user: req.user.username,
+    });
     return exhibit;
   }
 
   /* Get all exhibits (public) with pagination */
-  @ApiOperation({ summary: 'Get all exhibits..' })
+  @ApiOperation({ summary: 'Get all exhibits.' })
   @ApiResponse({
     status: 200,
     description: 'Exhibits successfully received.',
