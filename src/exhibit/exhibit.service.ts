@@ -24,6 +24,7 @@ export class ExhibitService {
     private userRepository: Repository<User>,
   ) {}
 
+  /* Create a new exhibit and save uploaded file */
   createExhibit(
     file: Express.Multer.File,
     data: CreateExhibitDto,
@@ -54,6 +55,7 @@ export class ExhibitService {
     }
   }
 
+  /* Get all exhibits with pagination */
   getAllExhibits(
     page: number,
     limit: number,
@@ -61,6 +63,7 @@ export class ExhibitService {
     return this.exhibitsPaginate({ order: { id: 'DESC' } }, page, limit);
   }
 
+  /* Get one exhibit by id */
   async getExhibitById(id: number): Promise<Exhibit> {
     const exhibit = await this.exhibitRepository.findOne({
       where: {
@@ -72,7 +75,7 @@ export class ExhibitService {
     }
     return exhibit;
   }
-
+  /* Get exhibits belonging to a specific user with pagination */
   getOwnExhibits(
     userId: number,
     page: number,
@@ -88,6 +91,7 @@ export class ExhibitService {
     );
   }
 
+  /* Delete an exhibit by id if the requesting user is the owner */
   async deleteExhibit(id: number, userId: number): Promise<void> {
     const exhibit = await this.exhibitRepository.findOne({
       where: { id: id },
@@ -110,6 +114,7 @@ export class ExhibitService {
     }
   }
 
+  /* Private method to remove a file from disk */
   private removeFile(filePath: string): void {
     try {
       const filePathToRemove = path.join(__dirname, '../../../', filePath);
@@ -124,6 +129,7 @@ export class ExhibitService {
     }
   }
 
+  /* Private method for paginating exhibits */
   private async exhibitsPaginate(
     options: FindManyOptions<Exhibit>,
     page: number,

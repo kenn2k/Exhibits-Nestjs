@@ -7,6 +7,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 
+/* Create a new user */
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}

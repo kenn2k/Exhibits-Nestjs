@@ -37,6 +37,7 @@ interface RequestWithExhibit extends ExpressRequest {
 export class ExhibitController {
   constructor(private readonly exhibitService: ExhibitService) {}
 
+  /* Create a new exhibit with image upload */
   @UseGuards(JwtAuthGuard)
   @Post()
   @UseInterceptors(FileInterceptor('image'))
@@ -81,6 +82,7 @@ export class ExhibitController {
     return exhibit;
   }
 
+  /* Get all exhibits (public) with pagination */
   @ApiOperation({ summary: 'Get all exhibits..' })
   @ApiResponse({
     status: 200,
@@ -95,6 +97,7 @@ export class ExhibitController {
     return exhibits;
   }
 
+  /* Get one exhibit by its id (public) */
   @ApiOperation({ summary: 'Get exhibit by id.' })
   @ApiResponse({
     status: 200,
@@ -105,6 +108,7 @@ export class ExhibitController {
     return this.exhibitService.getExhibitById(id);
   }
 
+  /* Get exhibits belonging to the authenticated user with pagination */
   @UseGuards(JwtAuthGuard)
   @Get('my-posts')
   @ApiBearerAuth('access_token')
@@ -122,6 +126,7 @@ export class ExhibitController {
   //! @Get('static/:filename')
   //! getImage(@Param() filename: string) {}
 
+  /* Delete an exhibit by id if owner is authenticated */
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access_token')
   @ApiOperation({ summary: 'Delete exhibit by id.' })

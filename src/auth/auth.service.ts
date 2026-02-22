@@ -14,6 +14,8 @@ export class AuthService {
     private userRepository: Repository<User>,
     private jwtService: JwtService,
   ) {}
+
+  /* Validate user credentials */
   async validateUser(data: LoginDto): Promise<IUser | null> {
     const { username, password } = data;
 
@@ -27,6 +29,7 @@ export class AuthService {
     return null;
   }
 
+  /* Generate JWT token for a validated user */
   loginUser(user: IUser) {
     const payload = { username: user.username, id: user.id };
     return {

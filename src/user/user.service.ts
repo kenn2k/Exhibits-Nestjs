@@ -14,6 +14,7 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
+  /* Create a new user */
   async registerUser(data: RegisterDto): Promise<IUser> {
     const { username, password } = data;
 

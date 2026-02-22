@@ -19,6 +19,7 @@ interface RequestWithUser extends ExpressRequest {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  /* Login user */
   @UseGuards(AuthGuard('local'))
   @Post('login')
   @ApiOperation({ summary: 'Login user and receiving JWT token' })
